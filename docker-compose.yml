@@ -56,18 +56,22 @@ services:
   db:
     image: postgres
     environment:
-      POSTGRES_USER: your_user
-      POSTGRES_PASSWORD: your_password
-      POSTGRES_DB: your_db
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_HOST=${DB_HOST} 
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_DB=${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
 
   redis:
     image: redis:alpine
-    ports:
-      - "6379:6379"
+    # ports:
+    #   - "6379:6379"
+    environment: 
+      REDIS_URL: "redis://${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB}"
 
   backend_rds:
     build:
@@ -79,28 +83,26 @@ services:
       - "8000:8000"
     depends_on:
       - db
-    environment:
-      DJANGO_SETTINGS_MODULE: backend_rds.settings
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: your_db
-      DB_USER: your_user
-      DB_PASSWORD: your_password
+    # environment:
+    #   DB_HOST: db
+    #   DB_PORT: 5432
+    #   DB_NAME: your_db
+    #   DB_USER: your_user
+    #   DB_PASSWORD: your_password
 
   backend_redis:
     build:
       context: ./backend_redis
       dockerfile: Dockerfile
-    volumes:
-      - ./data:/app
+    # volumes:
+    #   - ./data:/app
     ports:
       - "8001:8001"
     depends_on:
       - redis
-    environment:
-      DJANGO_SETTINGS_MODULE: backend_redis.settings
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+    # environment:
+    #   REDIS_HOST: redis
+    #   REDIS_PORT: 6379
 
 volumes:
   postgres_data:
