@@ -1,0 +1,106 @@
+# version: '3'
+
+# services:
+#   db:
+#     image: postgres
+#     environment:
+#       POSTGRES_USER: yourusername
+#       POSTGRES_PASSWORD: yourpassword
+#       POSTGRES_DB: yourdatabase
+#       DB_HOST
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     ports:
+#       - "5432:5432"
+
+#   redis:
+#     image: redis:alpine
+#     ports:
+#       - "6379:6379"
+
+#   backend_rds:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     command: python backend_rds/manage.py runserver 0.0.0.0:8000
+#     volumes:
+#       - .:/app
+#     ports:
+#       - "8000:8000"
+#     depends_on:
+#       - db
+#       - redis
+#     environment:
+#       DJANGO_SETTINGS_MODULE: backend_rds.settings
+
+#   backend_redis:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     command: python backend_redis/manage.py runserver 0.0.0.0:8001
+#     volumes:
+#       - .:/app
+#     ports:
+#       - "8001:8001"
+#     depends_on:
+#       - redis
+#     environment:
+#       DJANGO_SETTINGS_MODULE: backend_redis.settings
+
+# volumes:
+#   postgres_data:
+
+
+version: '3'
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: your_user
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: your_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  backend_rds:
+    build:
+      context: ./backend_rds
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DJANGO_SETTINGS_MODULE: backend_rds.settings
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: your_db
+      DB_USER: your_user
+      DB_PASSWORD: your_password
+
+  backend_redis:
+    build:
+      context: ./backend_redis
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - redis
+    environment:
+      DJANGO_SETTINGS_MODULE: backend_redis.settings
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+volumes:
+  postgres_data:
