@@ -77,18 +77,25 @@ services:
     build:
       context: ./backend_rds
       dockerfile: Dockerfile
-    volumes:
-      - ./:/app
+    # volumes:
+    #   - ./:/app
     ports:
       - "8000:8000"
     depends_on:
       - db
-    # environment:
-    #   DB_HOST: db
-    #   DB_PORT: 5432
-    #   DB_NAME: your_db
-    #   DB_USER: your_user
-    #   DB_PASSWORD: your_password
+    environment:
+      # - DB_USER=${DB_USER}
+      # - DB_PASSWORD=${DB_PASSWORD}
+      # - DB_HOST=${DB_HOST} 
+      # - DB_PORT=${DB_PORT}
+      # - DB_NAME=${DB_NAME}
+
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=your_db
+      - DB_USER=your_user
+      - DB_PASSWORD=your_password
+      - CORS_ALLOWED_ORIGINS='http://localhost', '127.0.0.1', '0.0.0.0','*'
 
   backend_redis:
     build:
@@ -111,6 +118,13 @@ services:
       - CORS_ALLOW_CREDENTIALS=True
     #   REDIS_HOST: redis
     #   REDIS_PORT: 6379
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
 
 volumes:
   postgres_data:
