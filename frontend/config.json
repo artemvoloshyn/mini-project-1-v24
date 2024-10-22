@@ -1,8 +1,10 @@
 {
-    "BACKEND_RDS_URL": "http://<public-rds-endpoint>:<port>/test_connection/",
+    // "BACKEND_RDS_URL": "http://<public-rds-endpoint>:<port>/test_connection/",
+    "BACKEND_RDS_URL": "http://mini-project-1-v24-backend_rds-1:8000/test_connection/",
     
     // "BACKEND_REDIS_URL": "http://<public-redis-endpoint>:<port>/test_connection/"
-    "BACKEND_REDIS_URL": "https://musical-guacamole-xxw9j779wjw3p67-8001.app.github.dev/test_connection/"
+    "BACKEND_REDIS_URL": "http://mini-project-1-v24-backend_redis-1/test_connection/"
+
 
   }
   
