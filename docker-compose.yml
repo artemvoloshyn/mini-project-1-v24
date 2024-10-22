@@ -78,7 +78,7 @@ services:
       context: ./backend_rds
       dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - ./:/app
     ports:
       - "8000:8000"
     depends_on:
@@ -100,7 +100,15 @@ services:
       - "8001:8001"
     depends_on:
       - redis
-    # environment:
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=your_password
+      - REDIS_DB=db
+      - CORS_ALLOWED_ORIGINS='http://localhost', '127.0.0.1', '0.0.0.0','*'
+      # - CORS_ORIGIN_WHITELIST="https://localhost:3000"
+      - CORS_ALLOW_ALL_ORIGINS=True
+      - CORS_ALLOW_CREDENTIALS=True
     #   REDIS_HOST: redis
     #   REDIS_PORT: 6379
 
