@@ -5,7 +5,7 @@ FROM nginx:alpine
 WORKDIR /usr/share/nginx/html
 
 # Copy index.html and config.json
-COPY ./templates/index.html config.json .
+COPY ./templates/index.html config.json ./
 
 # Set file permissions
 RUN chmod 644 index.html config.json

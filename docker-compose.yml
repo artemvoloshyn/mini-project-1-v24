@@ -26,7 +26,7 @@ services:
       context: ./backend_rds
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "8000:8000"
     depends_on:
       - db
     env_file: 
@@ -48,8 +48,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: web
     ports:
-      - "8000:80"
+      - "8080:80"
 
 volumes:
   postgres_data:
