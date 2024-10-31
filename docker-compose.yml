@@ -6,12 +6,6 @@ services:
       - "5432:5432"
     env_file: 
       - .env
-    # environment:
-    #   - POSTGRES_USER=${DB_USER}
-    #   - POSTGRES_PASSWORD=${DB_PASSWORD}
-    #   - POSTGRES_HOST=${DB_HOST} 
-    #   - POSTGRES_PORT=${DB_PORT}
-    #   - POSTGRES_DB=${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -21,8 +15,6 @@ services:
       - "6379:6379"
     env_file: 
       - .env
-    # environment: 
-    #  - REDIS_URL="redis://${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB}"
 
   backend_rds:
     container_name: backend_rds
