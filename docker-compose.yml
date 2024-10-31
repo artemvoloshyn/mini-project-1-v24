@@ -1,0 +1,52 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file: 
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    env_file: 
+      - .env
+
+  backend_rds:
+    container_name: backend_rds
+    build:
+      context: ./backend_rds
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file: 
+      - .env
+
+  backend_redis:
+    container_name: backend_redis
+    build:
+      context: ./backend_redis
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    depends_on:
+      - redis
+    env_file: 
+      - .env
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: web
+    ports:
+      - "8080:80"
+
+volumes:
+  postgres_data:
