@@ -1,0 +1,6 @@
+terraform.tfdestroy
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfplan
+hashicorp
+.terraform.lock.hcl
