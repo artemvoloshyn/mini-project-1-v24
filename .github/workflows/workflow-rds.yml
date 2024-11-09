@@ -1,8 +1,8 @@
 # name: 'backend_rds/*'
-on:
-  push:
-    paths:
-      - 'backend_rds/*'
+on: workflow_dispatch 
+  # push:
+  #   paths:
+  #     - 'backend_rds/*'
 
 jobs:
   ci:
