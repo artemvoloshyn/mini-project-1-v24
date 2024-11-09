@@ -4,7 +4,6 @@ on:
     paths:
       - 'backend_rds/*'
 
-
 jobs:
   ci:
     name: CI
