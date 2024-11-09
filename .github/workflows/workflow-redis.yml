@@ -1,8 +1,10 @@
-on:
-  push:
-    paths:
-      - 'backend_redis/*'
-
+# name: 'backend_rds/*'
+on: workflow_dispatch 
+  # push:
+  #   paths:
+  #     - 'backend_redis/*'
+env:
+      IMAGE_NAME: ${{ vars.IMAGE_NAME_REDIS }}
 
 jobs:
   ci:
@@ -11,5 +13,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with: 
+        with:
+          ref: 'workflows'
           fetch-depth: 0
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+      
+      # Step 4: Get short Git commit hash and the commit tag
+      - name: Get commit tag and short hash
+        id: vars
+        run: |
+          echo "COMMIT_TAG=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }} ./$IMAGE_NAME
+
+      - name: Push Docker Image to ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}
+          
+
+      

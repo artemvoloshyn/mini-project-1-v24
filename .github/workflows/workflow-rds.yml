@@ -4,7 +4,7 @@ on: workflow_dispatch
   #   paths:
   #     - 'backend_rds/*'
 env:
-      IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+      IMAGE_NAME: ${{ vars.IMAGE_NAME_RDS }}
 
 jobs:
   ci:
@@ -23,19 +23,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     role-to-assume: ${{ secrets.AWS_ACCOUNT }}
-      #     aws-region: ${{ secrets.AWS_REGION }}
-      
-      # # Step 3: Log in to AWS ECR
-      # - name: Log in to AWS ECR
-      #   uses: aws-actions/amazon-ecr-login@v1
-
-      # - name: Set up Docker
-      #   uses: docker/setup-buildx-action@v2
 
       - name: Log in to Amazon ECR
         run: |
