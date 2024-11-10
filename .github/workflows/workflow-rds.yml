@@ -108,11 +108,13 @@ jobs:
             # Automatically accept host key
             mkdir -p ~/.ssh
             ssh-keyscan -H ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
+            whoami
+            
       
             cd ~
-            docker compose up -d
+            sudo docker compose up -d
             # Check if docker-compose up was successful
-            if [ $(docker compose ps -q backend_rds) ]; then
+            if [ $(sudo docker compose ps -q backend_rds) ]; then
               echo "Docker containers are up and running."
             else
               echo "Docker-compose failed. Exiting."
