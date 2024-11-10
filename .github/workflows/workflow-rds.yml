@@ -85,7 +85,7 @@ jobs:
           username: ${{ secrets.AWS_ACCOUNT }}
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           source: "./docker-compose.yml"
-          target: "~/docker-compose.yml"
+          target: "~/"
 
 
       - name: Set up SSH
