@@ -73,9 +73,14 @@ jobs:
         run: |
           echo "COMMIT_TAG=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       
+      # - uses: mikefarah/yq@master
+      #   with:
+      #     cmd: yq e '.services.backend_rds.image = "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ vars.IMAGE_NAME_RDS }}:${{ env.COMMIT_TAG }}"' -i docker-compose.yml
       - uses: mikefarah/yq@master
         with:
-          cmd: yq e '.services.backend_rds.image = "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ vars.IMAGE_NAME_RDS }}:${{ env.COMMIT_TAG }}"' -i docker-compose.yml
+          cmd: |
+          yq e '.services.backend_rds |= {"image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ env.COMMIT_TAG }}", .}' -i docker-compose.yml
+
       
       
       - name: Copy file from runner to remote VM
