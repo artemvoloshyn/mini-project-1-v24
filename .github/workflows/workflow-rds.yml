@@ -75,7 +75,7 @@ jobs:
       
       - uses: mikefarah/yq@master
         with:
-          cmd: yq e '.services.backend_rds.image = "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}"' -i docker-compose.yml
+          cmd: yq e '.services.backend_rds.image = "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ vars.IMAGE_NAME_RDS }}:${{ env.COMMIT_TAG }}"' -i docker-compose.yml
       
       
       - name: Copy file from runner to remote VM
