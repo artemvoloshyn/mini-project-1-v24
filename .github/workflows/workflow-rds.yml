@@ -84,9 +84,16 @@ jobs:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_ACCOUNT }}
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
-          source: |
-            ./docker-compose.yml
-            ./.env
+          source: "./docker-compose.yml"
+          target: "~/"
+
+      - name: Copy file from runner to remote VM
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_ACCOUNT }}
+          key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          source: "./.env"
           target: "~/"
 
 
