@@ -78,6 +78,16 @@ jobs:
           cmd: yq e '.services.backend_rds.image = "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}"' -i docker-compose.yml
       
       
+      - name: Copy file from runner to remote VM
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_ACCOUNT }}
+          key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          source: "./docker-compose.yml"
+          target: "~/docker-compose.yml"
+
+
       - name: Set up SSH
         uses: appleboy/ssh-action@v0.1.5
         with:
