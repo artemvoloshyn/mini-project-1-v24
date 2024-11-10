@@ -89,7 +89,7 @@ jobs:
             cd ~
             mv docker-compose.yml docker-compose.yml.backup
             scp ./docker-compose.yml ${{ secrets.AWS_ACCOUNT }}@${{ secrets.AWS_HOST }}:~
-            docker-compose up -d
+            docker compose up -d
             # Check if docker-compose up was successful
             if [ $(docker-compose ps -q backend_rds) ]; then
               echo "Docker containers are up and running."
