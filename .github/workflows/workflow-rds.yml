@@ -44,4 +44,70 @@ jobs:
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}
           
 
+  cd:
+    name: CD
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: 'workflows'
+          fetch-depth: 0
+
+      # - name: Set up AWS CLI
+      #   uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ secrets.AWS_REGION }}
+
+      # - name: Log in to Amazon ECR
+      #   run: |
+      #     aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
       
+      # Step 4: Get short Git commit hash and the commit tag
+      - name: Get commit tag and short hash
+        id: vars
+        run: |
+          echo "COMMIT_TAG=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      
+      - uses: mikefarah/yq@master
+        with:
+          cmd: yq e '.services.backend_rds.image = "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}"' -i docker-compose.yml
+      
+      
+      - name: Set up SSH
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_ACCOUNT }}
+          key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~
+            mv docker-compose.yml docker-compose.yml.backup
+            scp ./docker-compose.yml ${{ secrets.AWS_ACCOUNT }}@${{ secrets.AWS_HOST }}:~
+            docker-compose up -d
+            # Check if docker-compose up was successful
+            if [ $(docker-compose ps -q backend_rds) ]; then
+              echo "Docker containers are up and running."
+            else
+              echo "Docker-compose failed. Exiting."
+              exit 1
+            fi
+  
+      - name: Push code to repository if docker-compose up is successful
+        if: ${{ success() }}
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git commit -am "Update docker-compose.yml ${{ env.COMMIT_TAG }}"
+          git push 
+
+          
+      
+    
+
+          
