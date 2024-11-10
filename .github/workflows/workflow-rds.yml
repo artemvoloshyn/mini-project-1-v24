@@ -101,8 +101,6 @@ jobs:
             ssh-keyscan -H ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
       
             cd ~
-            mv docker-compose.yml docker-compose.yml.backup || echo "files doesn't exists"
-            scp ./docker-compose.yml ${{ secrets.AWS_ACCOUNT }}@${{ secrets.AWS_HOST }}:~
             docker compose up -d
             # Check if docker-compose up was successful
             if [ $(docker compose ps -q backend_rds) ]; then
