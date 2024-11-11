@@ -6,7 +6,7 @@ on: workflow_dispatch
 env:
       IMAGE_NAME: ${{ vars.IMAGE_NAME_RDS }}
 
-# jobs:
+jobs:
 #   ci:
 #     name: CI
 #     runs-on: ubuntu-latest
