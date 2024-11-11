@@ -101,19 +101,19 @@ jobs:
           source: "./.env"
           target: "~/"
 
-      - name: ls -a via ssh
-        uses: fifsky/ssh-action@master
-        with:
-          command: |
-            cd ~
-            ll
+      # - name: ls -a via ssh
+      #   uses: fifsky/ssh-action@master
+      #   with:
+      #     command: |
+      #       cd ~
+      #       ll
             
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+      #       aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
-            sudo docker compose -f docker-compose-rds-prod.yml  up -d
-          host: ${{ secrets.AWS_HOST }}
-          user: ${{ secrets.AWS_ACCOUNT }}
-          key: ${{ secrets.AWS_SSH_PRIVATE_KEY}}
+      #       sudo docker compose -f docker-compose-rds-prod.yml  up -d
+      #     host: ${{ secrets.AWS_HOST }}
+      #     user: ${{ secrets.AWS_ACCOUNT }}
+      #     key: ${{ secrets.AWS_SSH_PRIVATE_KEY}}
 
 
       - name: Add host key to known_hosts
@@ -135,6 +135,7 @@ jobs:
                   
             cd ~
             ls -la
+            sudo apt-get install -y awscli
 
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
