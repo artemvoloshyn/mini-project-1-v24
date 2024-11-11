@@ -46,7 +46,7 @@ jobs:
 
   cd:
     name: CD
-    # needs: ci
+    needs: ci
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -87,7 +87,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.5
         with:
           host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_EC2_USERNAME }}
+          username: ${{ vars.AWS_EC2_USERNAME }}
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           source: "./docker-compose-rds-prod.yml"
           target: "~/"
@@ -96,7 +96,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.5
         with:
           host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_EC2_USERNAME }}
+          username: ${{ vars.AWS_EC2_USERNAME }}
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           source: "./.env"
           target: "~/"
@@ -123,7 +123,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_EC2_USERNAME }}
+          username: ${{ vars.AWS_EC2_USERNAME }}
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           port: 22
           script: |
