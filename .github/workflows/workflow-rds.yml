@@ -7,41 +7,41 @@ env:
       IMAGE_NAME: ${{ vars.IMAGE_NAME_RDS }}
 
 jobs:
-#   ci:
-#     name: CI
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v3
-#         with:
-#           ref: 'workflows'
-#           fetch-depth: 0
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: 'workflows'
+          fetch-depth: 0
 
-#       - name: Set up AWS CLI
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: ${{ secrets.AWS_REGION }}
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-#       - name: Log in to Amazon ECR
-#         run: |
-#           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
       
-#       # Step 4: Get short Git commit hash and the commit tag
-#       - name: Get commit tag and short hash
-#         id: vars
-#         run: |
-#           echo "COMMIT_TAG=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      # Step 4: Get short Git commit hash and the commit tag
+      - name: Get commit tag and short hash
+        id: vars
+        run: |
+          echo "COMMIT_TAG=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       
-#       - name: Build Docker Image
-#         run: |
-#           docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }} ./$IMAGE_NAME
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }} ./$IMAGE_NAME
 
-#       - name: Push Docker Image to ECR
-#         run: |
-#           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}
+      - name: Push Docker Image to ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}
           
 
   cd:
@@ -55,33 +55,16 @@ jobs:
           ref: 'workflows'
           fetch-depth: 0
 
-      # - name: Set up AWS CLI
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{ secrets.AWS_REGION }}
-
-      # - name: Log in to Amazon ECR
-      #   run: |
-      #     aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-
-      
       # Step 4: Get short Git commit hash and the commit tag
       - name: Get commit tag and short hash
         id: vars
         run: |
           echo "COMMIT_TAG=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       
-      # - uses: mikefarah/yq@master
-      #   with:
-      #     cmd: yq e '.services.backend_rds.image = "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ vars.IMAGE_NAME_RDS }}:${{ env.COMMIT_TAG }}"' -i docker-compose.yml
       - uses: mikefarah/yq@master
         with:
           cmd: |
             yq e '.services.backend_rds |= {"image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ env.COMMIT_TAG }}"} + .' -i docker-compose-rds-prod.yml
-
-      
       
       - name: Copy file from runner to remote VM
         uses: appleboy/scp-action@v0.1.5
