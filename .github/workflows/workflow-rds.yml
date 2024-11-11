@@ -42,6 +42,8 @@ jobs:
       - name: Push Docker Image to ECR
         run: |
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}
+
+
           
 
   cd:
@@ -84,25 +86,10 @@ jobs:
           source: "./.env"
           target: "~/"
 
-      # - name: ls -a via ssh
-      #   uses: fifsky/ssh-action@master
-      #   with:
-      #     command: |
-      #       cd ~
-      #       ll
-            
-      #       aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-
-      #       sudo docker compose -f docker-compose-rds-prod.yml  up -d
-      #     host: ${{ secrets.AWS_HOST }}
-      #     user: ${{ secrets.AWS_ACCOUNT }}
-      #     key: ${{ secrets.AWS_SSH_PRIVATE_KEY}}
-
-
       - name: Add host key to known_hosts
         run: mkdir -p ~/.ssh && ssh-keyscan ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
       
-      - name: Set up SSH
+      - name: On EC2 set up AWS CLI, AWS credentials, login to ECR, deploy backend_rds
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.AWS_HOST }}
@@ -110,30 +97,24 @@ jobs:
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # # Automatically accept host key
-            # mkdir -p ~/.ssh
-            # ssh-keyscan -H ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
-            
             sudo apt-get install -y awscli
 
-            whoami
             aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws configure set region ${{ secrets.AWS_REGION }}            
 
-
             cd ~
+
             ls -la
             
-
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
             docker compose -f docker-compose-rds-prod.yml  up -d
             # Check if docker-compose up was successful
-            if [ $(docker compose ps -q backend_rds) ]; then
-              echo "Docker containers are up and running."
-            else
-              echo "Docker-compose failed. Exiting."
+            if docker compose -f docker-compose-rds-prod.yml ps --format "{{.Names}}\t{{.Image}}\t{{.Status}}" | grep -i "backend_rds" | grep -i "Up"; then
+              echo "Container 'backend_rds' is running"
+            else     
+              echo "Container 'backend_rds' is not running"
               exit 1
             fi
   
