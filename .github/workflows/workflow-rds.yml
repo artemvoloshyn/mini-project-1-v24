@@ -7,41 +7,41 @@ env:
       IMAGE_NAME: ${{ vars.IMAGE_NAME_RDS }}
 
 jobs:
-  # ci:
-  #   name: CI
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #       with:
-  #         ref: 'workflows'
-  #         fetch-depth: 0
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: 'workflows'
+          fetch-depth: 0
 
-  #     - name: Set up AWS CLI
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ secrets.AWS_REGION }}
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-  #     - name: Log in to Amazon ECR
-  #       run: |
-  #         aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
       
-  #     # Step 4: Get short Git commit hash and the commit tag
-  #     - name: Get commit tag and short hash
-  #       id: vars
-  #       run: |
-  #         echo "COMMIT_TAG=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      # Step 4: Get short Git commit hash and the commit tag
+      - name: Get commit tag and short hash
+        id: vars
+        run: |
+          echo "COMMIT_TAG=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       
-  #     - name: Build Docker Image
-  #       run: |
-  #         docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }} ./$IMAGE_NAME
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }} ./$IMAGE_NAME
 
-  #     - name: Push Docker Image to ECR
-  #       run: |
-  #         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}
+      - name: Push Docker Image to ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}
           
 
   cd:
@@ -87,7 +87,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.5
         with:
           host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_ACCOUNT }}
+          username: ${{ secrets.AWS_EC2_USERNAME }}
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           source: "./docker-compose-rds-prod.yml"
           target: "~/"
@@ -96,7 +96,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.5
         with:
           host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_ACCOUNT }}
+          username: ${{ secrets.AWS_EC2_USERNAME }}
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           source: "./.env"
           target: "~/"
@@ -123,7 +123,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_ACCOUNT }}
+          username: ${{ secrets.AWS_EC2_USERNAME }}
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           port: 22
           script: |
@@ -144,13 +144,13 @@ jobs:
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
             sudo docker compose -f docker-compose-rds-prod.yml  up -d
-      #       # Check if docker-compose up was successful
-      #       if [ $(sudo docker compose ps -q backend_rds) ]; then
-      #         echo "Docker containers are up and running."
-      #       else
-      #         echo "Docker-compose failed. Exiting."
-      #         exit 1
-      #       fi
+            # Check if docker-compose up was successful
+            if [ $(sudo docker compose ps -q backend_rds) ]; then
+              echo "Docker containers are up and running."
+            else
+              echo "Docker-compose failed. Exiting."
+              exit 1
+            fi
   
       # - name: Push code to repository if docker-compose up is successful
       #   if: ${{ success() }}
