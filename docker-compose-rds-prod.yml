@@ -4,21 +4,27 @@ services:
     image: postgres
     ports:
       - "5432:5432"
-    env_file: 
+    env_file:
       - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
  
   backend_rds:
-    container_name: backend_rds-99
+    container_name: backend_rds
     build:
       context: ./backend_rds
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file: 
       - .env
 
