@@ -69,6 +69,9 @@ jobs:
           cmd: |
             yq e '.services.${{ env.IMAGE_NAME }} |= {"image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ env.COMMIT_TAG }}"} + .' -i ${{ env.DOCKER_COMPOSE_FILE }}
       
+      - name: Check file existence
+        run: ls -l ./.env docker-compose-redis-prod.yml
+      
       
       - name: Copy file from runner to remote VM
         uses: appleboy/scp-action@v0.1.5
