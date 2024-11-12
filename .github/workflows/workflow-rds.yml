@@ -2,7 +2,7 @@
 on: # workflow_dispatch 
   push:
     paths:
-      - '${{ env.IMAGE_NAME }}/*'
+      - 'backend_rds/*'
 env:
       IMAGE_NAME: ${{ vars.IMAGE_NAME_RDS }}
       DOCKER_COMPOSE_FILE: ${{ vars.BACKEND_RDS_DOCKER_COMPOSE_FILE }}
