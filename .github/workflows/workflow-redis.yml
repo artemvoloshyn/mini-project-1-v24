@@ -5,7 +5,7 @@ on: workflow_dispatch
   #     - '${{ env.IMAGE_NAME }}/*'
 env:
       IMAGE_NAME: ${{ vars.IMAGE_NAME_REDIS }}
-      DOCKER_COMPOSE_FILE: ${{ var.BACKEND_REDIS_DOCKER_COMPOSE_FILE }}
+      DOCKER_COMPOSE_FILE: ${{ vars.BACKEND_REDIS_DOCKER_COMPOSE_FILE }}
 
 jobs:
   ci:
