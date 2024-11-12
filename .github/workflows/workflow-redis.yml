@@ -1,8 +1,8 @@
 # name: 'backend_redis/*'
-on: workflow_dispatch 
-  # push:
-  #   paths:
-  #     - '${{ env.IMAGE_NAME }}/*'
+on: # workflow_dispatch 
+  push:
+    paths:
+      - '${{ env.IMAGE_NAME }}/*'
 env:
       IMAGE_NAME: ${{ vars.IMAGE_NAME_REDIS }}
       DOCKER_COMPOSE_FILE: ${{ vars.BACKEND_REDIS_DOCKER_COMPOSE_FILE }}
@@ -69,10 +69,6 @@ jobs:
           cmd: |
             yq e '.services.${{ env.IMAGE_NAME }} |= {"image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ env.COMMIT_TAG }}"} + .' -i ${{ env.DOCKER_COMPOSE_FILE }}
       
-      - name: Check file existence
-        run: ls -l ./.env docker-compose-redis-prod.yml
-      
-      
       - name: Copy file from runner to remote VM
         uses: appleboy/scp-action@v0.1.5
         with:
@@ -81,15 +77,6 @@ jobs:
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           source: "./${{ env.DOCKER_COMPOSE_FILE }},./.env"
           target: "~/"
-
-      # - name: Copy file from runner to remote VM
-      #   uses: appleboy/scp-action@v0.1.5
-      #   with:
-      #     host: ${{ secrets.AWS_HOST }}
-      #     username: ${{ vars.AWS_EC2_USERNAME }}
-      #     key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
-      #     source: "./.env"
-      #     target: "~/"
 
       - name: Add host key to known_hosts
         run: mkdir -p ~/.ssh && ssh-keyscan ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
