@@ -81,7 +81,6 @@ jobs:
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           source: "./${{ env.DOCKER_COMPOSE_FILE }},./.env"
           target: "~/"
-          strip_components: 3
 
       # - name: Copy file from runner to remote VM
       #   uses: appleboy/scp-action@v0.1.5
