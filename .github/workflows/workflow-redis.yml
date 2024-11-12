@@ -2,9 +2,10 @@
 on: workflow_dispatch 
   # push:
   #   paths:
-  #     - 'backend_redis/*'
+  #     - '${{ env.IMAGE_NAME }}/*'
 env:
       IMAGE_NAME: ${{ vars.IMAGE_NAME_REDIS }}
+      DOCKER_COMPOSE_FILE: ${{ var.BACKEND_REDIS_DOCKER_COMPOSE_FILE }}
 
 jobs:
   ci:
@@ -66,7 +67,7 @@ jobs:
       - uses: mikefarah/yq@master
         with:
           cmd: |
-            yq e '.services.backend_rds |= {"image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ env.COMMIT_TAG }}"} + .' -i docker-compose-redis-prod.yml
+            yq e '.services.${{ env.IMAGE_NAME }} |= {"image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ env.COMMIT_TAG }}"} + .' -i ${{ env.DOCKER_COMPOSE_FILE }}
       
       - name: Copy file from runner to remote VM
         uses: appleboy/scp-action@v0.1.5
@@ -75,7 +76,7 @@ jobs:
           username: ${{ vars.AWS_EC2_USERNAME }}
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           source: |
-            ./docker-compose-redis-prod.yml 
+            ./${{ env.DOCKER_COMPOSE_FILE }}
             ./.env
           target: "~/"
 
@@ -91,7 +92,7 @@ jobs:
       - name: Add host key to known_hosts
         run: mkdir -p ~/.ssh && ssh-keyscan ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
       
-      - name: On EC2 set up AWS CLI, AWS credentials, login to ECR, deploy backend_redis
+      - name: On EC2 set up AWS CLI, AWS credentials, login to ECR, deploy ${{ env.IMAGE_NAME }}
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.AWS_HOST }}
@@ -111,12 +112,12 @@ jobs:
             
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
-            docker compose -f docker-compose-redis-prod.yml  up -d
-            # Check if docker-compose up was successful
-            if docker compose -f docker-compose-redis-prod.yml ps --format "{{.Names}}\t{{.Image}}\t{{.Status}}" | grep -i "backend_redis" | grep -i "Up"; then
-              echo "Container 'backend_redis' is running"
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} up -d
+            # Check if ${{ env.DOCKER_COMPOSE_FILE }} up was successful
+            if docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} ps --format "{{.Names}}\t{{.Image}}\t{{.Status}}" | grep -i "${{ env.IMAGE_NAME }}" | grep -i "Up"; then
+              echo "Container '${{ env.IMAGE_NAME }}' is running"
             else     
-              echo "Container 'backend_redis' is not running"
+              echo "Container '${{ env.IMAGE_NAME }}' is not running"
               exit 1
             fi
   
