@@ -31,7 +31,7 @@ variable "availability_zone" {
 variable "allowed_ports" {
   type        = list(any)
   description = "List of allowed ports"
-  default     = ["80", "22", "443", "8080"]
+  default     = ["80", "22", "443", "8080", "8000", "8001"]
 
 }
 
