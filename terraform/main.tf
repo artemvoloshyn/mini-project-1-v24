@@ -140,11 +140,7 @@ resource "aws_instance" "EC2" {
     sudo systemctl status docker
     
     # Add current user to docker group
-<<<<<<< HEAD
     sudo usermod -aG docker ubuntu
-=======
-    sudo usermod -aG docker $USER
->>>>>>> aws-iac-conf
     
     # # Install Docker Compose
     # sudo curl -L "https://github.com/docker/compose/releases/download/v1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
