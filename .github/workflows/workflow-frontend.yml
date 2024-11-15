@@ -22,7 +22,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy html to S3
-        run: aws s3 sync frontend/ s3://${{ secrets.AWS_S3_BUCKET_NAME }}/
+        run: aws s3 sync frontend/templates s3://${{ secrets.AWS_S3_BUCKET_NAME }}/
 
       - name: Deploy json to S3
         run: aws s3 cp frontend/config.json s3://${{ secrets.AWS_S3_BUCKET_NAME }}/
