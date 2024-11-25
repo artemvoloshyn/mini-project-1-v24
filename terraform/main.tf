@@ -122,7 +122,7 @@ resource "aws_instance" "EC2" {
     sudo apt-get update
     
     # Install required packages
-    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common aws-cli
     
     # Add Docker's official GPG key
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -150,6 +150,8 @@ resource "aws_instance" "EC2" {
     
     # Verify Docker Compose installation
     docker compose version
+
+
 
   EOL
 
