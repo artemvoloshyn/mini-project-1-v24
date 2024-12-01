@@ -13,7 +13,7 @@ resource "aws_cloudfront_origin_access_control" "example" {
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
-    domain_name              = aws_s3_bucket.website_bucket.bucket_regional_domain_name
+    domain_name              = var.aws_s3_bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.example.id
     origin_id                = local.s3_origin_id
     
@@ -22,7 +22,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   wait_for_deployment = true
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "Some comment"
+  comment             = "cloudfront from s3"
   default_root_object = "index.html"
 
   default_cache_behavior {
@@ -47,12 +47,12 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   restrictions {
     geo_restriction {
       restriction_type = "whitelist"
-      locations        = ["US", "CA", "GB", "DE", "PL"]
+      locations        = var.whitelist_locations
     }
   }
 
   tags = {
-    Environment = var.Environment
+    Environment = var.environment
   }
 
   viewer_certificate {

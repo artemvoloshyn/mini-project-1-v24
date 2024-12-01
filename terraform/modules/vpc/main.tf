@@ -4,7 +4,7 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
   enable_dns_support   = true
   tags = {
-    Environment = "var.Environment"
+    Environment = var.environment
   }
 }
 
@@ -18,7 +18,7 @@ resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "main"
+    Name = var.environment
   }
 }
 
@@ -31,7 +31,7 @@ resource "aws_route_table" "internet_rt" {
   }
 
   tags = {
-    Name = "example"
+    Name = var.environment
   }
 }
 
@@ -41,8 +41,8 @@ resource "aws_route_table_association" "internet_rta_association" {
 }
 
 resource "aws_security_group" "main_security_group" {
-  name        = "main sg"
-  description = "Main security group"
+  name        = var.security_group_name
+  description = var.security_group_description  
   vpc_id      = aws_vpc.main.id
 
   dynamic "ingress" {

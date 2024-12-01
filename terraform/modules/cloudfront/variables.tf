@@ -1,9 +1,16 @@
-variable "htm_source" {
-  type        = string
-  description = "html file location to upload"
+variable "aws_s3_bucket_regional_domain_name" {
+  type = string
+  description = "S3 bucket name for serving files"
+  
 }
 
-variable "config_source" {
+variable "environment" {
   type        = string
-  description = "config.json file location to upload"
+  description = "value"
+
+}
+
+variable "whitelist_locations" {
+  type        = list(any)
+  description = "List of allowed ports"
 }

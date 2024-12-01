@@ -120,34 +120,34 @@
 #    #!/bin/bash -xe
 #     # Update package index
 #     sudo apt-get update
-    
+
 #     # Install required packages
 #     sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common aws-cli
-    
+
 #     # Add Docker's official GPG key
 #     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    
+
 #     # Set up the stable repository
 #     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    
+
 #     # Update apt package index again
 #     sudo apt-get update
-    
+
 #     # Install Docker Engine
 #     sudo apt-get install -y docker-ce docker-ce-cli containerd.io 
-    
+
 #     # Verify installation
 #     sudo systemctl status docker
-    
+
 #     # Add current user to docker group
 #     sudo usermod -aG docker ubuntu
-    
+
 #     # # Install Docker Compose
 #     # sudo curl -L "https://github.com/docker/compose/releases/download/v1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    
+
 #     # # Apply executable permissions to docker-compose
 #     # sudo chmod +x /usr/local/bin/docker-compose
-    
+
 #     # Verify Docker Compose installation
 #     docker compose version
 
@@ -211,7 +211,7 @@
 #             }
 
 #         },
-      
+
 #     ]
 #   })
 #   depends_on = [
@@ -238,7 +238,7 @@
 #     domain_name              = aws_s3_bucket.website_bucket.bucket_regional_domain_name
 #     origin_access_control_id = aws_cloudfront_origin_access_control.example.id
 #     origin_id                = local.s3_origin_id
-    
+
 #   }
 
 #   wait_for_deployment = true
@@ -289,30 +289,49 @@
 
 
 module "vpc" {
-  source             = "./modules/vpc"
-  cidr               = var.cidr
-  public_cidr        = var.public_cidr
-  availability_zone  = var.availability_zone
+  source                     = "./modules/vpc"
+  cidr                       = var.cidr
+  publicCIDR                 = var.publicCIDR
+  environment                = var.environment
+  availability_zone          = var.availability_zone
+  security_group_name        = var.security_group_name
+  security_group_description = var.security_group_description
+  allowed_ports              = var.allowed_ports
 }
 
 module "ec2" {
-  source                   = "./modules/ec2"
-  instance_type            = var.instance_type
-  key_pair_name            = var.key_pair_name
-  availability_zone        = var.availability_zone
-  subnet_id                = module.vpc.public_subnet_id
-  security_group_id        = module.vpc.security_group_id
+  source                    = "./modules/ec2"
+  environment               = var.environment
+  instance_type             = var.instance_type
+  availability_zone         = var.availability_zone
+  aws_vpc_security_group_id = [module.vpc.aws_vpc_security_group_id]
+  aws_public_subnet_id      = module.vpc.aws_public_subnet_id
+  # use_data_provision_script = var.use_data_provision_script
+  depends_on                = [module.vpc]
 }
 
 module "s3" {
-  source       = "./modules/s3"
-  bucket_name  = var.bucket_name
-  html_source  = var.html_source
-  config_source = var.config_source
+  source                         = "./modules/s3"
+  aws_s3_bucket_name             = var.aws_s3_bucket_name
+  index_html_source              = var.index_html_source
+  config_json_source             = var.config_json_source
 }
 
+module "s3-policy" {
+  source                         = "./modules/s3-policy"
+  aws_s3_bucket_id               = module.s3.aws_s3_bucket_id
+  aws_s3_bucket_arn              = module.s3.aws_s3_bucket_arn
+  aws_user_account_id            = var.aws_user_account_id
+  aws_cloudfront_distribution_id = module.cloudfront.aws_cloudfront_distribution_id
+
+  # depends_on = [module.cloudfront]
+}
+
+
 module "cloudfront" {
-  source          = "./modules/cloudfront"
-  bucket_arn      = module.s3.bucket_arn
-  bucket_domain   = module.s3.bucket_domain
+  source                             = "./modules/cloudfront"
+  aws_s3_bucket_regional_domain_name = module.s3.aws_s3_bucket_regional_domain_name
+  environment                        = var.environment
+  whitelist_locations                = var.whitelist_locations
+  # depends_on                         = [module.s3]
 }
