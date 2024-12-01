@@ -39,11 +39,11 @@ variable "security_group_description" {
   description = "Security group description"
 }
 
-# variable "use_data_provision_script" {
-#   # type        = string
-#   description = "Script/commands to provision EC2"
+variable "use_data_provision_script" {
+  type        = string
+  description = "Script/commands to provision EC2"
 
-# }
+}
 
 
 variable "allowed_ports" {

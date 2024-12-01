@@ -26,7 +26,7 @@ variable "aws_public_subnet_id" {
   description = "Public subnet id"
 }
 
-# variable "use_data_provision_script" {
-#   type = string
-#   description = "Script/commands to provision EC2"
-# }
+variable "use_data_provision_script" {
+  type = string
+  description = "Script/commands to provision EC2"
+}
