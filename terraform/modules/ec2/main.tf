@@ -49,7 +49,7 @@ resource "aws_instance" "EC2" {
     http_tokens                 = "required"
     http_put_response_hop_limit = 1
   }
-    user_data = var.use_data_provision_script
+    user_data =  fileexists("${path.root}/user_data.sh") ? file("${path.root}/user_data.sh") : null # var.use_data_provision_script
 
   tags = {
     Name = var.environment

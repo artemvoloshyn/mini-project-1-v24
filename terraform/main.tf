@@ -16,7 +16,6 @@ module "ec2" {
   availability_zone         = var.availability_zone
   aws_vpc_security_group_id = [module.vpc.aws_vpc_security_group_id]
   aws_public_subnet_id      = module.vpc.aws_public_subnet_id
-  use_data_provision_script = var.use_data_provision_script
   depends_on                = [module.vpc]
 }
 

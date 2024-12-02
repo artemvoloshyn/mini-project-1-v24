@@ -3,7 +3,7 @@
 sudo apt-get update
 
 # Install required packages
-sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common aws-cli
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common awscli
 
 # Add Docker's official GPG key
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -23,5 +23,11 @@ sudo systemctl status docker
 # Add current user to docker group
 sudo usermod -aG docker ubuntu
 
+# # Install Docker Compose
+# sudo curl -L "https://github.com/docker/compose/releases/download/v1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+# Apply executable permissions to docker-compose
+# sudo chmod +x /usr/local/bin/docker-compose
+
 # Verify Docker Compose installation
 docker compose version
+
