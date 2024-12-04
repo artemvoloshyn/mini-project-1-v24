@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"cloudfront","Source":"./modules/cloudfront","Dir":"modules/cloudfront"},{"Key":"ec2","Source":"./modules/ec2","Dir":"modules/ec2"},{"Key":"s3","Source":"./modules/s3","Dir":"modules/s3"},{"Key":"s3-policy","Source":"./modules/s3-policy","Dir":"modules/s3-policy"},{"Key":"vpc","Source":"./modules/vpc","Dir":"modules/vpc"}]}

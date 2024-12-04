@@ -1,11 +1,11 @@
 output "EC2_public_IP" {
-  value     = aws_instance.EC2.associate_public_ip_address
+  value = module.ec2.EC2_public_IP
 }
 
 output "CDN_URL" {
-  value     = aws_cloudfront_distribution.s3_distribution.domain_name
+  value = module.cloudfront.aws_cloudfront_domain_name
 }
 
 output "CDN_ID" {
-  value     = aws_cloudfront_distribution.s3_distribution.id
+  value = module.cloudfront.aws_cloudfront_distribution_id
 }
