@@ -28,7 +28,6 @@ variable "availability_zone" {
 
 }
 
-
 variable "security_group_name" {
   type        = string
   description = "Security group name"
@@ -43,13 +42,11 @@ variable "allowed_ports" {
   type        = list(any)
   description = "List of allowed ports"
   # default     = ["80", "22", "443", "8080", "8000", "8001"]
-
 }
 
 variable "instance_type" {
   type        = string
   description = "value"
-
 }
 
 variable "aws_s3_bucket_name" {
@@ -75,5 +72,4 @@ variable "aws_user_account_id" {
 variable "whitelist_locations" {
   type        = list(any)
   description = "Locations from which access is allowed"
-
 }

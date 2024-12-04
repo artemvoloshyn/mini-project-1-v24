@@ -34,4 +34,4 @@ resource "aws_dynamodb_table" "tf_lock_testing_state_db_table" {
 #    dynamodb_table = "tf-lock-testing-state-db-table"
 #    # encrypt        = true
 #  }
-#}
+

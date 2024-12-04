@@ -12,3 +12,4 @@ aws_s3_bucket_name         = "t-e-s-t-9-8-765432-1"
 index_html_source          = "../frontend/templates/index.html"
 config_json_source         = "../frontend/config.json"
 aws_user_account_id        = "087143128777"
+
