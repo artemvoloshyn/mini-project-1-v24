@@ -1,0 +1,123 @@
+# name: 'backend_redis/*'
+on: # workflow_dispatch 
+  push:
+    paths:
+      - 'backend_rds/**'
+env:
+      IMAGE_NAME: ${{ vars.IMAGE_NAME_RDS }}
+      DOCKER_COMPOSE_FILE: ${{ vars.BACKEND_RDS_DOCKER_COMPOSE_FILE }}
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: 'workflows'
+          fetch-depth: 0
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+      
+      # Step 4: Get short Git commit hash and the commit tag
+      - name: Get commit tag and short hash
+        id: vars
+        run: |
+          echo "COMMIT_TAG=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }} ./$IMAGE_NAME
+
+      - name: Push Docker Image to ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$IMAGE_NAME:${{ env.COMMIT_TAG }}
+
+
+          
+
+  cd:
+    name: CD
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: 'workflows'
+          fetch-depth: 0
+
+      # Step 4: Get short Git commit hash and the commit tag
+      - name: Get commit tag and short hash
+        id: vars
+        run: |
+          echo "COMMIT_TAG=$(git rev-parse --abbrev-ref HEAD)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      
+      - uses: mikefarah/yq@master
+        with:
+          cmd: |
+            yq e '.services.${{ env.IMAGE_NAME }} |= {"image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ env.COMMIT_TAG }}"} + .' -i ${{ env.DOCKER_COMPOSE_FILE }}
+      
+      - name: Copy file from runner to remote VM
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ vars.AWS_EC2_USERNAME }}
+          key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          source: "./${{ env.DOCKER_COMPOSE_FILE }},./.env"
+          target: "~/"
+
+      - name: Add host key to known_hosts
+        run: mkdir -p ~/.ssh && ssh-keyscan ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: On EC2 set up AWS CLI, AWS credentials, login to ECR, deploy ${{ env.IMAGE_NAME }}
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ vars.AWS_EC2_USERNAME }}
+          key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws configure set region ${{ secrets.AWS_REGION }}            
+
+            cd ~
+
+            ls -la
+            
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} up -d
+            # Check if ${{ env.DOCKER_COMPOSE_FILE }} up was successful
+            if docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} ps --format "{{.Names}}\t{{.Image}}\t{{.Status}}" | grep -i "${{ env.IMAGE_NAME }}" | grep -i "Up"; then
+              echo "Container '${{ env.IMAGE_NAME }}' is running"
+            else     
+              echo "Container '${{ env.IMAGE_NAME }}' is not running"
+              exit 1
+            fi
+  
+      # - name: Push code to repository if docker-compose up is successful
+      #   if: ${{ success() }}
+      #   run: |
+      #     git config --global user.name "GitHub Actions"
+      #     git config --global user.email "actions@github.com"
+      #     git commit -am "Update docker-compose.yml ${{ env.COMMIT_TAG }}"
+      #     git push 
+
+          
+      
+    
+
+          
